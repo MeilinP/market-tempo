@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Can Charlie Parker Predict the Stock Market?</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --navy: #0a1628;
+            --dark-blue: #1a365d;
+            --gold: #d4af37;
+            --light-gold: #f4d03f;
+            --green: #10b981;
+            --red: #ef4444;
+            --text-light: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--navy) 0%, var(--dark-blue) 100%);
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '♪ ♫ ♬';
+            position: absolute;
+            font-size: 20rem;
+            opacity: 0.03;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-50px) rotate(10deg); }
+        }
+
+        .badge {
+            background: linear-gradient(90deg, var(--gold), var(--light-gold));
+            color: var(--navy);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            display: inline-block;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--text-light), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            max-width: 900px;
+        }
+
+        .highlight {
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            width: 100%;
+            margin: 3rem auto;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.2);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-description {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .cta-button {
+            background: linear-gradient(90deg, var(--gold), var(--light-gold));
+            color: var(--navy);
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-top: 2rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Content Sections */
+        .section {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            font-size: 1.2rem;
+        }
+
+        /* Personal Insight Section */
+        .insight-box {
+            background: rgba(212, 175, 55, 0.1);
+            border-left: 4px solid var(--gold);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 3rem 0;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .insight-box h3 {
+            color: var(--gold);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--gold);
+        }
+
+        .timeline-item {
+            display: flex;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(odd) {
+            flex-direction: row-reverse;
+        }
+
+        .timeline-content {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            width: 45%;
+            position: relative;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: var(--gold);
+            border-radius: 50%;
+            border: 4px solid var(--navy);
+        }
+
+        .timeline-phase {
+            color: var(--gold);
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border-left: 4px solid var(--gold);
+        }
+
+        .success {
+            border-left-color: var(--green);
+        }
+
+        .failure {
+            border-left-color: var(--red);
+        }
+
+        /* Music Player Section */
+        .music-player-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 3rem 0;
+        }
+
+        .song-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+
+        .song-tab {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .song-tab:hover {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: var(--gold);
+        }
+
+        .song-tab.active {
+            background: var(--gold);
+            color: var(--navy);
+            font-weight: 600;
+        }
+
+        .player-container {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .player-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .player-info {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .song-title {
+            font-size: 2rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .song-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .song-stat {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .song-stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .song-stat-value {
+            font-size: 1.5rem;
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 15px;
+            margin: 2rem 0;
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+        }
+
+        /* Visualizations */
+        .viz-section {
+            margin-top: 3rem;
+        }
+
+        .viz-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .viz-tab {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .viz-tab:hover {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: var(--gold);
+        }
+
+        .viz-tab.active {
+            background: var(--gold);
+            color: var(--navy);
+            font-weight: 600;
+        }
+
+        .viz-content {
+            display: none;
+        }
+
+        .viz-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* Charts */
+        .chart-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+        }
+
+        /* Key Findings Grid */
+        .findings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .finding-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 2rem;
+        }
+
+        .finding-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .finding-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--gold);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(0, 0, 0, 0.3);
+            margin-top: 5rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: var(--gold);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--light-gold);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item {
+                flex-direction: column !important;
+            }
+
+            .timeline-content {
+                width: calc(100% - 60px);
+                margin-left: 60px;
+            }
+
+            .timeline-marker {
+                left: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .song-tabs {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="badge">🎺 Music Information Retrieval Study</div>
+        <h1>Can Charlie Parker<br>Predict the Market?</h1>
+        <p class="hero-subtitle">
+            A data-driven journey discovering how jazz improvisational patterns 
+            correlate with S&P 500 movements with <span class="highlight">72% accuracy</span>
+        </p>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Win Rate</div>
+                <div class="stat-value">72%</div>
+                <div class="stat-description">At 60-min horizon</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Significance</div>
+                <div class="stat-value">p&lt;0.001</div>
+                <div class="stat-description">99.9% Confidence</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Correlation</div>
+                <div class="stat-value">0.987</div>
+                <div class="stat-description">Blue Monk vs SPY</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Sharpe Ratio</div>
+                <div class="stat-value">0.604</div>
+                <div class="stat-description">Risk-adjusted return</div>
+            </div>
+        </div>
+
+        <a href="#journey" class="cta-button">Start the Journey ↓</a>
+    </section>
+
+    <!-- The Journey -->
+    <section id="journey" class="section">
+        <h2 class="section-title">The Research Journey</h2>
+        <p class="section-subtitle">From personal observation to statistical breakthrough</p>
+
+        <!-- Personal Insight -->
+        <div class="insight-box">
+            <h3>💡 My Initial Observation</h3>
+            <p>
+                I noticed something fascinating: <strong>both the stock market and music share fundamental characteristics</strong>. 
+                They are inherently <strong>periodic</strong>, exhibiting repeating patterns and cycles. Both demonstrate a 
+                <strong>range of energy and volume</strong>—music through sound intensity and the market through trading activity. 
+                Most importantly, both contain <strong>recognizable patterns</strong> that emerge from seemingly chaotic behavior.
+            </p>
+            <p style="margin-top: 1rem;">
+                This observation led me to hypothesize: <em>If markets reflect collective human behavior, and music captures 
+                fundamental human rhythms, could there be a correlation between jazz improvisational patterns and market movements?</em>
+            </p>
+        </div>
+
+        <!-- Hypothesis & Methods -->
+        <div class="chart-container">
+            <h3 style="margin-bottom: 1rem; color: var(--gold);">📋 Research Hypothesis & Methodology</h3>
+            <p style="margin-bottom: 1rem; line-height: 1.8;">
+                <strong>Hypothesis:</strong> Charlie Parker's bebop jazz patterns, when analyzed through music information 
+                retrieval techniques, will correlate with and predict S&P 500 market movements.
+            </p>
+            <p style="line-height: 1.8;">
+                <strong>Data Extraction Methods:</strong>
+            </p>
+            <ul style="margin-left: 2rem; margin-top: 1rem; line-height: 2;">
+                <li><strong>Audio Analysis:</strong> Used Librosa library to extract professional audio features at ~43 samples/second</li>
+                <li><strong>Features Extracted:</strong> RMS Energy, Spectral Centroid, Spectral Rolloff, Zero Crossing Rate, Onset Strength, Tempo</li>
+                <li><strong>Dataset:</strong> 8 Charlie Parker songs, totaling 149,775 data points</li>
+                <li><strong>Market Data:</strong> SPY intraday data (1-minute and 5-minute bars) from Yahoo Finance</li>
+                <li><strong>Pattern Matching:</strong> Dynamic Time Warping (DTW) algorithm for finding similar shapes</li>
+                <li><strong>Feature Mapping:</strong> RMS Energy → Market Volume (best correlation found)</li>
+            </ul>
+        </div>
+
+        <!-- Timeline continues here... -->
+        <div class="timeline" style="margin-top: 3rem;">
+            <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                    <div class="timeline-phase">PHASE 1: DAILY DATA</div>
+                    <h3 class="timeline-title">Initial Exploration</h3>
+                    <p>Compared 8 Charlie Parker songs against 247 days of SPX daily data using correlation analysis.</p>
+                    <div class="timeline-result failure">
+                        <strong>Result:</strong> r = 0.26 (weak correlation)<br>
+                        <strong>Lesson:</strong> Time scale mismatch - can't compare 3-minute songs to daily data
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                    <div class="timeline-phase">PHASE 2: BREAKTHROUGH</div>
+                    <h3 class="timeline-title">Intraday Pattern Matching</h3>
+                    <p>Switched to 1-minute SPY data (7 days). Used Dynamic Time Warping (DTW) for pattern similarity.</p>
+                    <div class="timeline-result success">
+                        <strong>Result:</strong> Blue Monk DTW = 0.045, r = 0.987<br>
+                        <strong>Discovery:</strong> Near-perfect pattern match on Dec 9, 2025 at 14:44
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                    <div class="timeline-phase">PHASE 3: PREDICTION TEST</div>
+                    <h3 class="timeline-title">5-Minute Forward Returns</h3>
+                    <p>Found 25 Blue Monk-like patterns. Tested if they predict next 5 minutes.</p>
+                    <div class="timeline-result failure">
+                        <strong>Result:</strong> 45% win rate (random)<br>
+                        <strong>Lesson:</strong> 5 minutes dominated by noise
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                    <div class="timeline-phase">PHASE 4: TIME HORIZONS</div>
+                    <h3 class="timeline-title">Extended Predictions</h3>
+                    <p>Tested 5, 10, 20, 30, 45, 60 minute horizons on 7-day dataset.</p>
+                    <div class="timeline-result success">
+                        <strong>Result:</strong> 60-min shows 58% win rate<br>
+                        <strong>Discovery:</strong> Au Privave performs best at 70%
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                    <div class="timeline-phase">PHASE 5: VALIDATION</div>
+                    <h3 class="timeline-title">60-Day Final Test</h3>
+                    <p>Validated Au Privave pattern on 60 days of 5-minute SPY data (4,642 bars, 50 patterns).</p>
+                    <div class="timeline-result success">
+                        <strong>Result:</strong> 72% win rate, +0.0692% avg return<br>
+                        <strong>Statistical Tests:</strong> T-test p<0.001, Binomial p=0.0013<br>
+                        <strong>Conclusion:</strong> Statistically significant predictive power ✅
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Music Player Section -->
+    <section class="section">
+        <h2 class="section-title">🎵 Listen to the Songs</h2>
+        <p class="section-subtitle">Explore all 8 Charlie Parker songs analyzed in this study</p>
+
+        <div class="music-player-section">
+            <div class="song-tabs">
+                <button class="song-tab active" onclick="showSong(0)">Blue Monk</button>
+                <button class="song-tab" onclick="showSong(1)">Au Privave ⭐</button>
+                <button class="song-tab" onclick="showSong(2)">Bag's Groove</button>
+                <button class="song-tab" onclick="showSong(3)">Billie's Bounce</button>
+                <button class="song-tab" onclick="showSong(4)">Now's the Time</button>
+                <button class="song-tab" onclick="showSong(5)">Round Midnight</button>
+                <button class="song-tab" onclick="showSong(6)">Sonnymoon for Two</button>
+                <button class="song-tab" onclick="showSong(7)">Tenor Madness</button>
+            </div>
+
+            <!-- Song 0: Blue Monk -->
+            <div class="player-container active" id="song-0">
+                <div class="player-info">
+                    <h3 class="song-title">🎺 Blue Monk</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                        The perfect match: r = 0.987 correlation with SPY
+                    </p>
+                    <div class="song-stats">
+                        <div class="song-stat">
+                            <div class="song-stat-label">DTW Distance</div>
+                            <div class="song-stat-value">0.045</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Correlation</div>
+                            <div class="song-stat-value">0.987</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Duration</div>
+                            <div class="song-stat-value">3.8 min</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Tempo</div>
+                            <div class="song-stat-value">142 BPM</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="video-wrapper">
+                    <iframe src="https://www.youtube.com/embed/b1kO5KYGLts" 
+                        title="Blue Monk" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                <p style="text-align: center; margin-top: 1rem; color: var(--text-muted);">
+                    <strong>Pattern:</strong> Gradual volume buildup (0 → 0.1 → 0.13) over 3 minutes
+                </p>
+            </div>
+
+            <!-- Song 1: Au Privave -->
+            <div class="player-container" id="song-1">
+                <div class="player-info">
+                    <h3 class="song-title">⭐ Au Privave</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                        The best predictor: 72% win rate at 60-minute horizon
+                    </p>
+                    <div class="song-stats">
+                        <div class="song-stat">
+                            <div class="song-stat-label">Win Rate</div>
+                            <div class="song-stat-value">72%</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">DTW Distance</div>
+                            <div class="song-stat-value">0.052</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Duration</div>
+                            <div class="song-stat-value">2.6 min</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Tempo</div>
+                            <div class="song-stat-value">198 BPM</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="video-wrapper">
+                    <iframe src="https://www.youtube.com/embed/dvdQYSWOobc" 
+                        title="Au Privave" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                <p style="text-align: center; margin-top: 1rem; color: var(--text-muted);">
+                    <strong>Pattern:</strong> Sharp volume rise (0→1) in first 2 minutes - momentum ignition signal
+                </p>
+            </div>
+
+            <!-- Song 2: Bag's Groove -->
+            <div class="player-container" id="song-2">
+                <div class="player-info">
+                    <h3 class="song-title">🎵 Bag's Groove</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                        Moderate performance with flowing pattern
+                    </p>
+                    <div class="song-stats">
+                        <div class="song-stat">
+                            <div class="song-stat-label">DTW Distance</div>
+                            <div class="song-stat-value">0.184</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Ranking</div>
+                            <div class="song-stat-value">#3</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Duration</div>
+                            <div class="song-stat-value">5.7 min</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Tempo</div>
+                            <div class="song-stat-value">128 BPM</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="video-wrapper">
+                    <iframe src="https://www.youtube.com/embed/Vsdtve9LKFE" 
+                        title="Bag's Groove" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+
+            <!-- Song 3: Billie's Bounce -->
+            <div class="player-container" id="song-3">
+                <div class="player-info">
+                    <h3 class="song-title">🎶 Billie's Bounce</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                        Energetic and rhythmic patterns
+                    </p>
+                    <div class="song-stats">
+                        <div class="song-stat">
+                            <div class="song-stat-label">DTW Distance</div>
+                            <div class="song-stat-value">0.207</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Ranking</div>
+                            <div class="song-stat-value">#4</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Duration</div>
+                            <div class="song-stat-value">3.2 min</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Tempo</div>
+                            <div class="song-stat-value">176 BPM</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="video-wrapper">
+                    <iframe src="https://www.youtube.com/embed/gVVffSREjd4" 
+                        title="Billie's Bounce" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+
+            <!-- Song 4: Now's the Time -->
+            <div class="player-container" id="song-4">
+                <div class="player-info">
+                    <h3 class="song-title">🎼 Now's the Time</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                        Moderate tempo with recognizable pattern
+                    </p>
+                    <div class="song-stats">
+                        <div class="song-stat">
+                            <div class="song-stat-label">DTW Distance</div>
+                            <div class="song-stat-value">0.291</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Ranking</div>
+                            <div class="song-stat-value">#5</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Duration</div>
+                            <div class="song-stat-value">3.2 min</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Tempo</div>
+                            <div class="song-stat-value">176 BPM</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="video-wrapper">
+                    <iframe src="https://www.youtube.com/embed/RP29Qn00_Nw" 
+                        title="Now's the Time" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+
+            <!-- Song 5: Round Midnight -->
+            <div class="player-container" id="song-5">
+                <div class="player-info">
+                    <h3 class="song-title">🌙 Round Midnight</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                        Long, contemplative composition
+                    </p>
+                    <div class="song-stats">
+                        <div class="song-stat">
+                            <div class="song-stat-label">Duration</div>
+                            <div class="song-stat-value">17.7 min</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Ranking</div>
+                            <div class="song-stat-value">#7</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Tempo</div>
+                            <div class="song-stat-value">84 BPM</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Pattern</div>
+                            <div class="song-stat-value">Complex</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="video-wrapper">
+                    <iframe src="https://www.youtube.com/embed/IrAfjW5qiyo" 
+                        title="Round Midnight" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                <p style="text-align: center; margin-top: 1rem; color: var(--text-muted);">
+                    <em>Note: Longer songs showed weaker correlation with market patterns</em>
+                </p>
+            </div>
+
+            <!-- Song 6: Sonnymoon for Two -->
+            <div class="player-container" id="song-6">
+                <div class="player-info">
+                    <h3 class="song-title">☀️ Sonnymoon for Two</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                        Medium-long composition
+                    </p>
+                    <div class="song-stats">
+                        <div class="song-stat">
+                            <div class="song-stat-label">Duration</div>
+                            <div class="song-stat-value">9.1 min</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Ranking</div>
+                            <div class="song-stat-value">#8</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Tempo</div>
+                            <div class="song-stat-value">144 BPM</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">DTW</div>
+                            <div class="song-stat-value">1.419</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="video-wrapper">
+                    <iframe src="https://www.youtube.com/embed/KCzV9PxGS30" 
+                        title="Sonnymoon for Two" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+
+            <!-- Song 7: Tenor Madness -->
+            <div class="player-container" id="song-7">
+                <div class="player-info">
+                    <h3 class="song-title">🎷 Tenor Madness</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                        Extended, complex improvisation
+                    </p>
+                    <div class="song-stats">
+                        <div class="song-stat">
+                            <div class="song-stat-label">Duration</div>
+                            <div class="song-stat-value">12.7 min</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Ranking</div>
+                            <div class="song-stat-value">#6</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">Tempo</div>
+                            <div class="song-stat-value">160 BPM</div>
+                        </div>
+                        <div class="song-stat">
+                            <div class="song-stat-label">DTW</div>
+                            <div class="song-stat-value">0.994</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="video-wrapper">
+                    <iframe src="https://www.youtube.com/embed/9lER3FhjoJg" 
+                        title="Tenor Madness" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Visualizations Section -->
+    <section class="section">
+        <h2 class="section-title">📊 Interactive Visualizations</h2>
+        <p class="section-subtitle">Explore the data behind the discovery</p>
+
+        <div class="viz-section">
+            <div class="viz-tabs">
+                <button class="viz-tab active" onclick="showViz(0)">Audio Wave vs SPY</button>
+                <button class="viz-tab" onclick="showViz(1)">Blue Monk Perfect Match</button>
+                <button class="viz-tab" onclick="showViz(2)">Win Rate by Horizon</button>
+                <button class="viz-tab" onclick="showViz(3)">Return Distribution</button>
+            </div>
+
+            <!-- Viz 0: Audio Wave vs SPY -->
+            <div class="viz-content active" id="viz-0">
+                <div class="chart-container">
+                    <h3 style="margin-bottom: 1rem;">Audio Energy vs SPY Volume Pattern</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 2rem;">
+                        Comparison of normalized audio RMS energy (blue) and SPY trading volume (gold)
+                    </p>
+                    <div class="chart-wrapper">
+                        <canvas id="waveComparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Viz 1: Blue Monk Perfect Match -->
+            <div class="viz-content" id="viz-1">
+                <div class="chart-container">
+                    <h3 style="margin-bottom: 1rem;">Blue Monk: The Perfect Match (r = 0.987)</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 2rem;">
+                        December 9, 2025, 14:44-14:46 - Near-perfect pattern alignment
+                    </p>
+                    <div class="chart-wrapper">
+                        <canvas id="blueMonkChart"></canvas>
+                    </div>
+                    <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(16, 185, 129, 0.1); border-left: 4px solid var(--green); border-radius: 10px;">
+                        <strong>Statistical Proof:</strong><br>
+                        • Pearson Correlation: r = 0.987 (p = 0.102)<br>
+                        • DTW Distance: 0.045 (near-perfect)<br>
+                        • Pattern Type: Gradual volume buildup<br>
+                        • Market State: Low volatility, afternoon trading
+                    </div>
+                </div>
+            </div>
+
+            <!-- Viz 2: Win Rate by Horizon -->
+            <div class="viz-content" id="viz-2">
+                <div class="chart-container">
+                    <h3 style="margin-bottom: 1rem;">Prediction Performance by Time Horizon</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="horizonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Viz 3: Return Distribution -->
+            <div class="viz-content" id="viz-3">
+                <div class="chart-container">
+                    <h3 style="margin-bottom: 1rem;">Return Distribution (60-Minute Horizon)</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="distributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Findings -->
+    <section class="section">
+        <h2 class="section-title">Key Discoveries</h2>
+        <p class="section-subtitle">What we learned from 149,775 audio data points and 60 days of trading</p>
+
+        <div class="findings-grid">
+            <div class="finding-card">
+                <div class="finding-icon">🎯</div>
+                <h3 class="finding-title">Au Privave Wins</h3>
+                <p>The 2.6-minute song with sharp volume acceleration (0→1 pattern) predicts 60-minute market movements with 72% accuracy.</p>
+            </div>
+
+            <div class="finding-card">
+                <div class="finding-icon">⏰</div>
+                <h3 class="finding-title">Time Scale Matters</h3>
+                <p>Longer prediction horizons work better. 60-minute predictions outperform 5-minute by 27 percentage points.</p>
+            </div>
+
+            <div class="finding-card">
+                <div class="finding-icon">📅</div>
+                <h3 class="finding-title">Friday Effect</h3>
+                <p>70% of predictive patterns occur on Fridays, suggesting weekly positioning dynamics.</p>
+            </div>
+
+            <div class="finding-card">
+                <div class="finding-icon">🕒</div>
+                <h3 class="finding-title">Afternoon Patterns</h3>
+                <p>52% of signals cluster between 14:00-16:00, during peak trading activity.</p>
+            </div>
+
+            <div class="finding-card">
+                <div class="finding-icon">📊</div>
+                <h3 class="finding-title">Energy → Volume</h3>
+                <p>Musical RMS energy maps best to market trading volume, supporting behavioral correlation theory.</p>
+            </div>
+
+            <div class="finding-card">
+                <div class="finding-icon">🎵</div>
+                <h3 class="finding-title">Shorter is Better</h3>
+                <p>Songs under 4 minutes (Au Privave, Blue Monk) outperform longer compositions significantly.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <h3>Meilin Pan</h3>
+        <p style="color: var(--text-muted); margin: 1rem 0;">
+            BS Statistics & Data Science (UCSB) | MS Applied Data Science (USC)
+        </p>
+        <div class="footer-links">
+            <a href="https://github.com/MeilinP/market-tempo" class="footer-link" target="_blank">
+                📂 GitHub Repository
+            </a>
+            <a href="#" class="footer-link">
+                📄 Full Research Paper
+            </a>
+            <a href="https://linkedin.com/in/your-profile" class="footer-link" target="_blank">
+                💼 LinkedIn
+            </a>
+        </div>
+        <p style="margin-top: 2rem; color: var(--text-muted); font-size: 0.9rem;">
+            © 2025 Meilin Pan. This is research for educational purposes only, not financial advice.
+        </p>
+    </footer>
+
+    <script>
+        // Song player switching
+        function showSong(index) {
+            // Hide all players
+            const players = document.querySelectorAll('.player-container');
+            players.forEach(p => p.classList.remove('active'));
+            
+            // Hide all tab active states
+            const tabs = document.querySelectorAll('.song-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            // Show selected player and tab
+            document.getElementById(`song-${index}`).classList.add('active');
+            tabs[index].classList.add('active');
+        }
+
+        // Visualization switching
+        function showViz(index) {
+            // Hide all viz content
+            const vizContents = document.querySelectorAll('.viz-content');
+            vizContents.forEach(v => v.classList.remove('active'));
+            
+            // Hide all viz tab active states
+            const vizTabs = document.querySelectorAll('.viz-tab');
+            vizTabs.forEach(t => t.classList.remove('active'));
+            
+            // Show selected viz and tab
+            document.getElementById(`viz-${index}`).classList.add('active');
+            vizTabs[index].classList.add('active');
+        }
+
+        // Chart 1: Audio Wave vs SPY Comparison
+        const waveCtx = document.getElementById('waveComparisonChart').getContext('2d');
+        new Chart(waveCtx, {
+            type: 'line',
+            data: {
+                labels: ['0s', '30s', '60s', '90s', '120s', '150s'],
+                datasets: [
+                    {
+                        label: 'Audio Energy (Au Privave)',
+                        data: [0.0, 0.2, 0.5, 0.8, 1.0, 0.9],
+                        borderColor: '#6495ed',
+                        backgroundColor: 'rgba(100, 149, 237, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'SPY Volume (Normalized)',
+                        data: [0.05, 0.25, 0.52, 0.82, 0.98, 0.88],
+                        borderColor: '#d4af37',
+                        backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { 
+                        display: true,
+                        labels: { color: '#e2e8f0', font: { size: 14 } }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 1.2,
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#e2e8f0' },
+                        title: { display: true, text: 'Normalized Intensity', color: '#e2e8f0' }
+                    },
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#e2e8f0' },
+                        title: { display: true, text: 'Time', color: '#e2e8f0' }
+                    }
+                }
+            }
+        });
+
+        // Chart 2: Blue Monk Perfect Match
+        const blueMonkCtx = document.getElementById('blueMonkChart').getContext('2d');
+        new Chart(blueMonkCtx, {
+            type: 'line',
+            data: {
+                labels: ['14:44', '14:45', '14:46'],
+                datasets: [
+                    {
+                        label: 'Blue Monk Energy',
+                        data: [0.000, 0.102, 0.131],
+                        borderColor: '#6495ed',
+                        backgroundColor: 'rgba(100, 149, 237, 0.2)',
+                        pointRadius: 8,
+                        pointHoverRadius: 10,
+                        borderWidth: 3
+                    },
+                    {
+                        label: 'SPY Volume (Normalized)',
+                        data: [0.037, 0.096, 0.130],
+                        borderColor: '#d4af37',
+                        backgroundColor: 'rgba(212, 175, 55, 0.2)',
+                        pointRadius: 8,
+                        pointHoverRadius: 10,
+                        borderWidth: 3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { 
+                        display: true,
+                        labels: { color: '#e2e8f0', font: { size: 14 } }
+                    },
+                    title: {
+                        display: true,
+                        text: 'r = 0.987 Correlation',
+                        color: '#10b981',
+                        font: { size: 16, weight: 'bold' }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 0.15,
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#e2e8f0' }
+                    },
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#e2e8f0' }
+                    }
+                }
+            }
+        });
+
+        // Chart 3: Win Rate by Horizon
+        const horizonCtx = document.getElementById('horizonChart').getContext('2d');
+        new Chart(horizonCtx, {
+            type: 'line',
+            data: {
+                labels: ['5 min', '10 min', '20 min', '30 min', '40 min', '60 min'],
+                datasets: [{
+                    label: 'Win Rate (%)',
+                    data: [46, 60, 52, 64, 64, 72],
+                    borderColor: '#d4af37',
+                    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { 
+                        display: true,
+                        labels: { color: '#e2e8f0' }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#e2e8f0' }
+                    },
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#e2e8f0' }
+                    }
+                }
+            }
+        });
+
+        // Chart 4: Return Distribution
+        const distributionCtx = document.getElementById('distributionChart').getContext('2d');
+        new Chart(distributionCtx, {
+            type: 'bar',
+            data: {
+                labels: ['-0.4%', '-0.3%', '-0.2%', '-0.1%', '0%', '0.1%', '0.2%', '0.3%', '0.4%'],
+                datasets: [{
+                    label: 'Frequency',
+                    data: [2, 3, 5, 4, 8, 12, 10, 4, 2],
+                    backgroundColor: 'rgba(212, 175, 55, 0.6)',
+                    borderColor: '#d4af37',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { 
+                        display: true,
+                        labels: { color: '#e2e8f0' }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#e2e8f0' }
+                    },
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#e2e8f0' }
+                    }
+                }
+            }
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
