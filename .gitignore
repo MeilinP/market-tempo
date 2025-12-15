@@ -1,5 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# 虚拟环境
 venv/
+env/
+.venv/
+ENV/
+
+# 数据文件（太大）
 *.csv
 *.mp3
+*.wav
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb
+
+# macOS
 .DS_Store
-__pycache__/
+.AppleDouble
+.LSOverride
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Results（可以重新生成）
+results/*.png
+results/*.jpg
