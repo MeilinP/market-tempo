@@ -224,7 +224,7 @@ Each song has a unique tempo, structure, and pattern signature—combining them 
 
 **Chart 4: Now's the Time vs. SPX Daily Comparison**
 
-[INSERT CHART: Dual-axis plot showing jazz energy (blue) and SPX price range (red) over 247 days]
+![Jazz vs SPX Comparison](images/jazz_spx_comparison.png)
 
 ### 3.3 Interpretation of Results
 
@@ -306,7 +306,7 @@ Pattern B: [0.1, 0.6, 1.0]      (also rising, slightly offset)
 
 **Chart 6: DTW Alignment Example**
 
-[INSERT CHART: Two time series with warping path visualization]
+![DTW Overlay](images/dtw_overlay.png)
 
 ### 4.3 Implementation
 
@@ -376,7 +376,7 @@ def dtw_distance(s1, s2):
 
 **Chart 8: DTW Distance by Song (Daily Data)**
 
-[INSERT CHART: Bar chart showing DTW distances, color-coded by quality]
+![DTW Distance by Song](images/dtw_all_songs_clustering.png)
 
 ### 5.2 Pattern Analysis
 
@@ -456,7 +456,7 @@ def dtw_distance(s1, s2):
 
 **Chart 10: DTW Distance Comparison (Daily vs. Intraday)**
 
-[INSERT CHART: Side-by-side bar comparison showing dramatic improvement]
+![Daily vs Intraday Comparison](images/spy_dtw_comparison.png)
 
 **Intraday Results (1-Minute Data):**
 
@@ -674,7 +674,7 @@ Having established that jazz patterns **match** market patterns, we now ask:
 
 **Chart 16: Performance by Time Horizon**
 
-[INSERT CHART: Line graph showing win rate and average return increasing with horizon]
+![Extended Horizon Analysis](images/extended_horizon_analysis.png)
 
 **Chart 17: Sharpe Ratio by Horizon**
 
@@ -713,7 +713,7 @@ Having established that jazz patterns **match** market patterns, we now ask:
 
 **Chart 18: Au Privave 60-Min Distribution**
 
-[INSERT CHART: Histogram of Au Privave returns at 60-min]
+![Au Privave 60-Day Validation](images/au_privave_60day_validation.png)
 
 **Why Au Privave Works Best:**
 
